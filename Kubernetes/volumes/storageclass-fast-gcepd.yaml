@@ -1,0 +1,9 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: fast
+# The volume plugin to use for provisioning the PersistentVolume
+provisioner: kubernetes.io/gce-pd
+# the parameters passed to the provisioner
+parameters:
+  type: pd-ssd

@@ -1,0 +1,25 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: demo-ingress-resource-tls
+  annotations:
+    app.kubernetes.io/component: ingress
+    app: demo
+spec:
+  # tls for HTTPS configuration under tls attribute
+  tls:
+    # tls connections will be accepted for the demo.example.com hostname
+    - hosts:
+        - demo.example.com
+      # The private key and the certificate should be obtained from the tls-secret you created previously
+      secretName: tls-secret
+  rules:
+    # This ingress maps the demo.example.com domain name to your service
+    - host: demo.example.com
+      http:
+        paths:
+          - path: /
+            backend:
+              # All requests will be sent to port 80 of the demo-nodeport service
+              serviceName: demo-nodeport
+              servicePort: 80

@@ -1,0 +1,36 @@
+# This pod uses the GCE PersistentDisk directly. Not using a PV or PVC.
+# If you kubectl apply this pod, and then put something into the mongo database, using the GCE PD, it will persist the pod's lifespan.
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mongodb
+  labels:
+    app: demo
+    name: mongodb
+spec:
+  volumes:
+    # Name of volume (also referenced when mounting the volume)
+    - name: mongodb-data
+      # The type of the volume is a GCE Persistent Disk
+      gcePersistentDisk:
+        # The name of the persistent disk must match the actual PD you created.
+        # This name matches the name of the PersistentDisk created in either the terraform (name attribute on the resource you created) or the name in the GCP console.
+        pdName: mongodb
+        # The filesystem type is EXT4 (a type of Linux filesystem)
+        fsType: ext4
+  containers:
+  - name: mongodb
+    image: mongo
+    volumeMounts:
+      # The name of the volume referenced when mounting the volume. (from .spec.volumes.name)
+      - name: mongodb-data
+        # The path where mongo will store its data (in the pod/container)
+        mountPath: /data/db
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    ports:
+      - containerPort: 27017
+        protocol: TCP

@@ -1,0 +1,29 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: demo-ingress-resource
+  # annotations:
+    # app.kubernetes.io/component: ingress
+    # app: demo
+    # enabled: "true"
+    # If you're running multiple ingress controllers, or running on a cloud provider that natively handles ingress such as GKE,
+    # you need to specify the annotation kubernetes.io/ingress.class: "nginx" in all ingresses
+    # that you would like the ingress-nginx controller to claim
+    # kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    # This ingress maps the demo.example.com domain name to your service
+    - host: demo.example.com
+      http:
+        paths:
+          - path: /
+            backend:
+              # All requests will be sent to port 80 of the demo-nodeport service
+              serviceName: demo-nodeport
+              servicePort: 80
+              # servicePort: 8080
+          - path: /fortune
+            backend:
+              # All requests will be sent to port 80 of the demo-loadbalancer service
+              serviceName: demo-loadbalancer
+              servicePort: 80

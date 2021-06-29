@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+# Describes the deployment itself. It gives a label (if you include label: ) for that actual deployment.
+metadata:
+  name: demo-deployment-pod
+  namespace: default
+spec:
+  #  A selector for the deployment to apply to the pod that the deployment is describing.
+  selector:
+    # tells the resource, whatever it may be, service, deployment, etc, to match the pod, according to that label.
+    # In the Deployment spec.selector you have two options to decide on which node the pods will be scheduled on, which are: matchExpressions, matchLabels.
+    # Telling deployment to match selector where app=demo, so it links pods to the deployment - should match a corresponding service's labels: to link the service to the deployment and pod.
+    matchLabels:
+      app: demo
+  template:
+    # Template is a pod template
+    metadata:
+      # This is not a label for the deployment anymore, it’s a label for the pod that the deployment is deploying.
+      labels:
+        app: demo
+        enabled: "true"
+    spec:
+      containers:
+      - image: nginx:latest
+        imagePullPolicy: IfNotPresent
+        name: demo
+        resources:
+          limits:
+            memory: "10Mi"
+            cpu: "5m"
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        readinessProbe:
+            # Type of readiness probe (one of the three types)
+            exec:
+              # readiness probe may be defined for each container in the pod.
+              # ls /var/ready return 0 exit code if the file exists, non-zero if it doesn't.
+              command:
+                - ls
+                - /var/ready

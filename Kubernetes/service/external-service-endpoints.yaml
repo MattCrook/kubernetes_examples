@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Endpoints
+# Name of endpoints object must match name of endpoints service
+metadata:
+  name: external-service
+subsets:
+  # The IPs of the endpoints that the service will forward connections to
+  - addresses:
+      - ip: 11.11.11.11
+      - ip: 22.22.22.22
+    ports:
+      # Target port of the endpoints
+      - port: 80

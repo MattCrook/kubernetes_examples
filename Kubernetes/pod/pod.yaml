@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kubia-manual-v2
+  labels:
+    enabled: "true"
+    app: demo
+spec:
+  containers:
+  - name: kubia
+    image: luksa/kubia
+    resources:
+      limits:
+        memory: "64Mi"
+        cpu: "250m"
+    # livenessProbe that will perform an http GET. A way to make sure applications are restarted in such cases,
+    # you must check an application’s health from the outside and not depend on the app doing it internally
+    livenessProbe:
+      httpGet:
+        # path to request in the http request
+        # path: /
+        # network port the probe should attach to
+        # port: 8080
+        path: /healthz
+        port: 8080
+      # If you don/t set the initial delay, the prober will start probing the container as soon as it starts, which
+      # usually leads to the probe failing, bc the app isn't ready to start receiving requests.
+      initialDelaySeconds: 15
+    ports:
+      - containerPort: 8080
+        protocol: TCP

@@ -1,0 +1,27 @@
+# This pod uses the GCE PersistentDisk not directly but through a PV and PVC.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mongodb
+  labels:
+    app: demo
+    name: mongodb
+spec:
+  containers:
+  - name: mongodb
+    image: mongo
+    volumeMounts:
+      - name: mongodb-data
+        mountPath: /data/db
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    ports:
+      - containerPort: 27017
+        protocol: TCP
+  volumes:
+    - name: mongodb-data
+      # Referencing the PersistentVolumeClaim by name in the pod volume
+      persistentVolumeClaim:
+        claimName: mongodb-pvc
