@@ -51,6 +51,7 @@ gcloud container clusters create <cluster_name> \
     --project=<project_in_GCP> \
     --region=us-central1
     --zone=us-central1-c
+    --machine-type f1-micro
 ```
 
 
