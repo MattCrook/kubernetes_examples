@@ -4,22 +4,22 @@ metadata:
   name: fortune
   labels:
     app: fortune
-    enabled: "true"
+    # enabled: "true"
 spec:
   containers:
     # The first container is called html-generator and runs the luksa/fortune image
-    - image: luksa/fortune
+    - image: luksa/fortune:env
       env:
         - name: INTERVAL
           value: "30"
       name: html-generator
-      # resources:
+      resources:
       #   requests:
       #     memory: "10Mi"
       #     cpu: "5m"
-      #   limits:
-      #     memory: "10Mi"
-      #     cpu: "5m"
+        limits:
+          memory: "64Mi"
+          cpu: "250m"
       # The volume called html is mounted at /var/htdocs in the container
       volumeMounts:
       - name: html
@@ -27,13 +27,13 @@ spec:
       # The second container is called web-server and runs the nginx:alpine image
     - image: nginx:alpine
       name: web-server
-      # resources:
+      resources:
       #   requests:
       #     memory: "10Mi"
       #     cpu: "5m"
-      #   limits:
-      #     memory: "10Mi"
-      #     cpu: "5m"
+        limits:
+          memory: "64Mi"
+          cpu: "250m"
       # The same volume as above is mounted at /usr/share/nginx/html as read-only
       volumeMounts:
         - name: html
@@ -46,7 +46,7 @@ spec:
   volumes:
   - name: html
     # volume  was  created  on  the  actual  disk  of  the  worker node hosting your pod
-    emptyDir: {}
+    # emptyDir: {}
     # Tell Kubernetes to create the emptyDir on a tmpfs filesystem (in memory instead of on disk).
-    # emptyDir:
-    #   medium: Memory
+    emptyDir:
+      medium: Memory

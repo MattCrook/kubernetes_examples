@@ -3,8 +3,9 @@ kind: Pod
 metadata:
   name: kubia-manual-v2
   labels:
-    enabled: "true"
-    app: demo
+    # enabled: "true"
+    # app: demo
+    app: fortune
 spec:
   containers:
   - name: kubia

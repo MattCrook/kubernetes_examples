@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: fortune-env-from-configmap
+  labels:
+    name: myapp
+spec:
+  containers:
+  - name: fortune-env-pod
+    image: luksa/fortune:env
+    env:
+    # Setting th environment variable called INTERVAL
+    - name: INTERVAL
+      valueFrom:
+        # Instead of setting a fixed value, you're initializing it from a ConfigMap key
+        configMapKeyRef:
+          # Name of the configmap you're referencing
+          name: fortune-config
+          # Setting the variable to whatever is stored in the key in the ConfigMap
+          key: sleep-interval
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    ports:
+      - containerPort: 80
+        protocol: TCP

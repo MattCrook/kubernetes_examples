@@ -4,15 +4,15 @@ metadata:
   name: demo-loadbalancer
 spec:
   selector:
-    # app: fortune
-    app: demo
-    enabled: "true"
+    app: fortune
+    # app: demo
+    # enabled: "true"
   type: LoadBalancer
   # Prevent a network hop, by configuring service to redirect all external traffic only to pods running on the node that received the connection.
-  externalTrafficPolicy: Local
+  # externalTrafficPolicy: Local
   ports:
   - protocol: TCP
-    port: 80
-    targetPort: 8080
-    # targetPort: 80
-    # nodePort: 31786
+    port: 3200
+    # targetPort: 8080
+    targetPort: 80
+    nodePort: 31613
