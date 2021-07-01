@@ -3,7 +3,7 @@ kind: Pod
 metadata:
   name: fortune-env-from-configmap
   labels:
-    name: myapp
+    app: fortun 
 spec:
   containers:
   - name: fortune-env-pod
@@ -18,6 +18,8 @@ spec:
           name: fortune-config
           # Setting the variable to whatever is stored in the key in the ConfigMap
           key: sleep-interval
+    # Referencing the env variable in the argument
+    args: ["$(INTERVAL)"]
     resources:
       limits:
         memory: "128Mi"
