@@ -3,7 +3,7 @@ kind: Pod
 metadata:
   name: fortune-env-from-configmap
   labels:
-    app: fortun 
+    app: fortune
 spec:
   containers:
   - name: fortune-env-pod
