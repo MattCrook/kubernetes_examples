@@ -2,3 +2,5 @@ notes.txt*
 
 tls.cert*
 tls.key*
+https.cert*
+https.key*

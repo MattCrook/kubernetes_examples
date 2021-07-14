@@ -8,11 +8,25 @@ spec:
   containers:
   - image: luksa/fortune:env
     name: html-generator
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "512M"
+      limits:
+        cpu: "1000m"
+        memory: "512M"
     volumeMounts:
     - name: html
       mountPath: /var/htdocs
   - image: nginx:alpine
     name: web-server
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "512M"
+      limits:
+        cpu: "1000m"
+        memory: "512M"
     volumeMounts:
     - name: html
       mountPath: /usr/share/nginx/html
