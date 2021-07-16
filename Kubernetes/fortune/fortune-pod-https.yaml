@@ -19,6 +19,15 @@ spec:
         configMapKeyRef:
           name: fortune-config
           key: sleep-interval
+    - name: FOO_SECRET
+      # Setting env variable from Secret.
+      # The variable should be set from the entry of a secret.
+      valueFrom:
+        secretKeyRef:
+          # name of secret holding the key
+          name: fortune-https
+          # the key the secret should expose
+          key: foo
     volumeMounts:
     - name: html
       mountPath: /var/htdocs

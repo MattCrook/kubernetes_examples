@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: downward
+spec:
+  containers:
+  - name: main
+    image: busybox
+    command: ["sleep", "9999999"]
+    resources:
+      requests:
+        cpu: 15m
+        memory: 100Ki
+      limits:
+        cpu: 100m
+        memory: 4Mi
+    env:
+    - name: POD_NAME
+      valueFrom:
+        fieldRef:
+          # instead of specifying an absolute value, you're referencing the metadata.name field from the pod manifest
+          fieldPath: metadata.name
+    - name: POD_NAMESPACE
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.namespace
+    - name: POD_IP
+      valueFrom:
+        fieldRef:
+          fieldPath: status.podIP
+    - name: NODE_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
+    - name: SERVICE_ACCOUNT
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.serviceAccountName
+    - name: CONTAINER_CPU_REQUEST_MILLICORES
+      valueFrom:
+      # A container's requests and limits are referenced by using resourceFieldRef instead of fieldRef
+        resourceFieldRef:
+          # For resource fields, you define a divisor to get the value in the unit you need
+          resource: requests.cpu
+          divisor: 1m
+    - name: CONTAINER_MEMORY_LIMIT_KIBIBYTES
+      valueFrom:
+        resourceFieldRef:
+          resource: limits.memory
+          divisor: 1Ki
+
+
+# When your process runs, it can look up all the environment variables you defined in the pod spec.
+# The pod’s name,IP,and namespace will be exposed through the POD_NAME,POD_IP, and POD_NAMESPACE environment variables,respectively.
+# The name of the node the container is running on will be exposed through the NODE_NAME variable.
+# The name of the serviceaccount is made available through the SERVICE_ACCOUNT environment variable.
+# You’re also creating two environment variables that will hold the amount of CPU requested for this container and the maximum amount of memory the container is allowed to consume.
+
+# For environment variables exposing resource limits or requests, you specify a divisor.
+# The actual value of the limit or the request will be divided by the divisor and the result exposed through the environment variable.
+# You’re setting the divisor for CPU requests to 1m(one milli-core,or one one-thousandth of a CPU core).
+# Because you’ve set the CPU request to 15m,the environment variable CONTAINER_CPU_REQUEST_MILLICORES will be set to 15.
+# Likewise, you set the memory limit to 4Mi (4 mebibytes) and the divisor to 1Ki (1 Kibibyte), so the CONTAINER_MEMORY_LIMIT_KIBIBYTES environment variable will be set to 4096.

@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: private-pod
+  labels:
+    name: demo
+spec:
+  imagePullSecrets:
+  - name: mydockerhubsecret
+  containers:
+  - image: username/private:tag
+    name: main
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "512M"
+      limits:
+        cpu: "1000m"
+        memory: "512M"
