@@ -238,3 +238,28 @@ $ kubectl exec downward -- cat /etc/downward/annotations
 $ kubectl cluster-info
 -k option is curl's insecure option
 $ curl https://192.168.64.4:8443 -k
+
+
+Running curl-pod:
+$ kubectl exec -it curl -- sh
+env | grep KUBERNETES_SERVICE
+
+$ ls var/run/secrets/kubernetes.io/serviceaccount/
+$ curl --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.cert https://kubernetes
+
+Setting CURL_CA_BUNDLE Environment Variable
+Be kubectl exec into pod, and run:
+export CURL_CA_BUNDLE=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+
+To authenticate, you need an authentication token.
+Luckily, the token is provided through the default-token Secret mentioned previously, and is stored in the token file in the secret volume.
+As the Secret’s name suggests, that’s the primary purpose of the Secret.
+You’re going to use the token to access the API server.
+First, load the token into an environment variable.
+TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+
+Set namespace as environment variable:
+NS=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+
+Get all pods in pods namespace:
+curl -H "Authorization: Bearer $TOKEN" https://kubernetes/api/v1/namespaces/$NS/pods

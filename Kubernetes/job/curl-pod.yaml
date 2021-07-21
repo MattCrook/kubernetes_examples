@@ -6,6 +6,6 @@ spec:
   containers:
   - name: main
     # using the tatum/curl image, bc you need curl available inside the container
-    image: tutum/curl
+    image: curlimages/curl
     # runninn sleep command with long delay to keep the container running
     command: ["sleep", "9999999"]

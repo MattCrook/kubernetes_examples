@@ -1,0 +1,44 @@
+GCP
+
+gcloud container clusters create <cluster_name> \
+    --num-nodes=2 \
+    --project=<project_in_GCP> \
+    --region=us-central1
+    --zone=us-central1-c
+    --machine-type f1-micro
+    --enable-stackdriver-kubernetes
+
+After creating your cluster, get authentication credentials to interact and connect with the cluster:
+* gcloud container clusters get-credentials <cluster_name>
+
+Delete cluster:
+* gcloud container clusters delete <cluster_name>
+
+
+gcloud container clusters describe mycluster --format='get(endpoint)'
+
+Create cluster with Labels:
+gcloud container clusters create example-cluster --labels env=dev
+gcloud container clusters list --filter resourceLabels.env=dev
+-----------------------------
+AWS
+brew tap weaveworks/tap
+brew install weaveworks/tap/eksctl
+
+
+aws ec2 create-key-pair --region us-west-2 --key-name <myKeyPair>
+
+eksctl create cluster \
+    --name test-cluster
+    --version 1.17 \
+    --region us-east-2 \
+    --with-oidc \
+    --ssh-access \
+    --ssh-public-key <your-key> \
+    --nodegroup-name linux-nodes \
+    --node-type t2-medium \
+    --nodes 2
+    --managed
+
+
+eksctl delete cluster --name test-cluster --region us-east-2
