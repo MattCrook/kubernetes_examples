@@ -234,3 +234,7 @@ Looking at volumes in container of downward api volume
 $ kubectl exec downward -- ls -alh /etc/downward
 $ kubectl exec downward -- cat /etc/downward/labels
 $ kubectl exec downward -- cat /etc/downward/annotations
+
+$ kubectl cluster-info
+-k option is curl's insecure option
+$ curl https://192.168.64.4:8443 -k
