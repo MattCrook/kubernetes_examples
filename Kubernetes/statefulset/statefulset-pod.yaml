@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: stateful-pod
+spec:
+  serviceName: governing-service
+  replicas: 2
+  selector:
+    matchLabels:
+      app: stateful # has to match .spec.template.metadata.labels
+  template:
+    metadata:
+      labels:
+        app: stateful
+    spec:
+      containers:
+      - name: kubia
+        image: luksa/kubia-pet
+        ports:
+        - name: http
+          containerPort: 8080
+        # The container inside the pod will mount the PVC volume at this path
+        volumeMounts:
+        - name: data
+          mountPath: /var/data
+  # The PVCs will be created from this template
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      resources:
+        requests:
+          storage: 1Mi
+      accessModes:
+      - ReadWriteOnce

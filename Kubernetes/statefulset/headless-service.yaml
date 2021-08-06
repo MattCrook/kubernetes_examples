@@ -1,0 +1,15 @@
+# Creating a headlessService, which will be used to provide the network identity for your stateful pods.
+# This acts as the "Governing Service"
+apiVersion: v1
+kind: Service
+metadata:
+  name: governing-service
+spec:
+  # The stateful sets governing service must be headless
+  clusterIP: None
+  # all pods with the label app=stateful belong to this service
+  selector:
+    app: stateful
+  ports:
+  - name: http
+    port: 80

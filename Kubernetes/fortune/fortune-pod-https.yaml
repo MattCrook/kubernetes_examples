@@ -27,6 +27,7 @@ spec:
           # name of secret holding the key
           name: fortune-https
           # the key the secret should expose
+          # the value will be 'bar'
           key: foo
     volumeMounts:
     - name: html
