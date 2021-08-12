@@ -454,7 +454,7 @@ kubectl get pods
 
 ##### Connecting to Cluster-Internal Services Through the API Server
 ```
-Instead of using a piggyback pod to access the service from inside the cluster, you canuse  the  same  proxy  feature  provided  by  the  API  server  to access the service the way you’ve accessed individual pods. The URI path for proxy-ing requests to Services is formed like this:
+Instead of using a piggyback pod to access the service from inside the cluster, you can use  the  same  proxy  feature  provided  by  the  API  server  to access the service the way you’ve accessed individual pods. The URI path for proxy-ing requests to Services is formed like this:
 
 /api/v1/namespaces/<namespace>/services/<service name>/proxy/<path>
 
@@ -463,4 +463,110 @@ Therefore, you can run curl on your local machine and access the service through
 curl localhost:8001/api/v1/namespaces/default/services/kubia-public/proxy/
 You’ve hit kubia-1
 Data stored on this pod: No data pod
+```
+##### Hitting an Internal Service From Outside the Cluster
+Say we have a ClusterIP, Because this isn’t an externally exposed Service (it’s a regular ClusterIP Service, not a NodePort or a LoadBalancer-type  Service), you can only access it from inside the cluster. You’ll need a pod to access it from, right? Not necessarily.
+
+```
+kubectl proxy
+
+URI:
+/api/v1/namespaces/<namespace>/services/<service name>/proxy/<path>
+
+Ex:
+curl localhost:8001/api/v1/namespaces/default/services/stateful-public/proxy/
+```
+
+##### List SRV Records For Stateful pods
+
+You’re going to list the SRV records for your stateful pods by running the `dig` DNSlookup tool inside a new temporary pod. This is the command you’ll use:
+```
+kubectl run -it srvlookup --image=tutum/dnsutils --rm --restart=Never -- dig SRV kubia.default.svc.cluster.local
+```
+
+* The command runs a one-off pod `(--restart=Never)` called `srvlookup`, which is attached to the console `(-it)` and is deleted as soon as it terminates `(--rm)`.
+* The pod runs a single container from the `tutum/dnsutils` image and runs the following command:
+  * `dig SRV kubia.default.svc.cluster.local`
+
+```
+The ANSWER SECTION shows two SRV records pointing to the two pods backing your head-less service. Each pod also gets its own A record, as shown in ADDITIONAL SECTION.
+For a pod to get a list of all the other pods of a StatefulSet, all you need to do is perform an SRV DNS lookup.
+
+In Node.js, for example, the lookup is performed like this:
+dns.resolveSrv("kubia.default.svc.cluster.local", callBackFunction)
+```
+
+##### Trying Out Clustered Data Store (Stateful pod peers)
+
+```
+Writing to clustered data store through service:
+
+curl -X POST -d "The sun is shining" localhost:8001/api/v1/namespaces/default/services/stateful-public/proxy/
+Data stored on pod stateful-pod-peers-1
+
+curl -X POST -d "The weather is sweet"localhost:8001/api/v1/namespaces/default/services/stateful-public/proxy/
+Data stored on pod stateful-pod-peers-2
+
+Reading from the data store:
+curl localhost:8001/api/v1/namespaces/default/services/stateful-public/proxy/
+You’ve hit kubia-2Data stored on each cluster node:
+- kubia-0.kubia.default.svc.cluster.local: The weather is sweet
+- kubia-1.kubia.default.svc.cluster.local: The sun is shining
+- kubia-2.kubia.default.svc.cluster.local: No data posted yet
+
+When a client request reaches one of your cluster nodes, it discovers all its peers, gathers data from them, and sends all the data back to the client. Even if you scale the StatefulSet up or down, the pod servicing the client’s request can always find all the peers running at that
+```
+
+##### Shutting Down a Node's `eth0` Interface (Shutting down a node)
+
+To shut down a node’s eth0 interface, you need to ssh into one of the nodes like this:
+```
+gcloud compute ssh <NODE_NAME>
+gcloud compute ssh gke-kubia-default-pool-32a2cac8-m0
+
+Then, inside the node, run the following command:
+sudo ifconfig eth0 down
+
+Your ssh session will stop working, so you’ll need to open another terminal to continue
+```
+
+##### Forcibly Deleting Pod
+
+```
+The only thing you can do is tell the API server to delete the pod without waiting for the Kubelet to confirm that the pod is no longer running. 
+You do that like this:
+
+kubectl delete po kubia-0 --force --grace-period 0
+warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "kubia-0" delete
+```
+
+##### Bring Disconnected Node back Online
+```
+gloud compute instances reset <node_name>
+```
+##### Check Control Plane Status
+
+```
+kubectl get componentstatuses
+```
+##### Kubernetes components running as pods
+```
+kubectl get pods -o custom-columns=POD:metadata.name,NODE:spec.nodeName --sort-by spec.nodeName -n kube-system
+```
+
+##### Control Plane Etcd
+```
+etcdctl ls /registry
+
+If you’re using v3 of the etcd API, you can’t use the ls command to seethe contents of a directory. Instead, you can list all keys that start with a givenprefix with etcdctl get /registry --prefix=true
+
+etcdctl ls /registry/pods
+
+As you can infer from the names, these two entries correspond to the default and thekube-system  namespaces,  which  means  pods  are  stored  per  namespace.
+
+etcdctl ls /registry/pods/default
+
+etcd representing a pod:
+etcdctl get /registry/pods/default/kubia-159041347-wt6g
 ```

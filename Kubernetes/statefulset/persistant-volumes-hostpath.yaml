@@ -1,4 +1,5 @@
-# This is for creating the PV in Minikube, if created in GKE, need to create the GCE persistentDisk, or don't need to create any if the cluster supports dynamic provisioning.
+# This is for creating the PV in Minikube, if created in GKE,
+# need to create the GCE persistentDisk, or don't need to create any if the cluster supports dynamic provisioning.
 kind: List
 apiVersion: v1
 items:
