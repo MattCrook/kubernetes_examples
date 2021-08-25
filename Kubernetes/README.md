@@ -1,11 +1,8 @@
 # Commands
 
+Below is just a collection of commands that I ran when playing around with various clusters. More or less here to have a reference for myself. The commands are not in any particular order or organized in any specific way.
 
-##### Install EKSCTL
-```
-brew tap weaveworks/tap
-brew install weaveworks/tap/eksctl
-```
+
 ###### Create a cluster using CLI tools
 ```
 aws ec2 create-key-pair --region us-west-2 --key-name <myKeyPair>
