@@ -567,3 +567,12 @@ etcdctl ls /registry/pods/default
 etcd representing a pod:
 etcdctl get /registry/pods/default/kubia-159041347-wt6g
 ```
+
+##### Create pod Nginx and ssh onto node to investigate Docker containers, To see pod Infrastructure Container
+```
+kubectl run nginx --image=nginx
+minikube ssh
+or 
+gcloud compute ssh <NODE_NAME>
+docker ps
+```
