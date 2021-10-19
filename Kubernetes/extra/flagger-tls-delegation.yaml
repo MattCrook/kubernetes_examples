@@ -1,0 +1,11 @@
+# this allows certificates to be referenced by Ingress objects in other namespaces
+apiVersion: projectcontour.io/v1
+kind: TLSCertificateDelegation
+metadata:
+  name: prod-wildcard-gcp-development-website-com-tls
+  namespace: platform
+spec:
+  delegations:
+    - secretName: prod-wildcard-gcp-development-website-com-tls
+      targetNamespaces:
+        - "test"
