@@ -576,3 +576,8 @@ or
 gcloud compute ssh <NODE_NAME>
 docker ps
 ```
+
+###### the kube-scheduler Endpoints resources used for leader-election
+```
+kubectl get endpoints kube-scheduler -n kube-system -o yaml
+```
