@@ -1,0 +1,32 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  annotations:
+    app.com/cluster: istio-poc-development
+    app.com/environment: development
+    app.com/group: istio-poc
+    app.com/region: us-central1
+    meta.helm.sh/release-name: test-app
+    meta.helm.sh/release-namespace: istio-poc
+  generation: 1
+  labels:
+    app: test-app
+    app.kubernetes.io/managed-by: Helm
+    chart: default-beta-0.4.0-beta
+    heritage: Helm
+    release: test-app
+  name: test-app
+  namespace: istio-poc
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - test-app.istio.dev
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: prod-wildcard-istio-dev-tls
+      mode: SIMPLE

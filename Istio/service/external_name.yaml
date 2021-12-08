@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    meta.helm.sh/release-name: test-app
+    meta.helm.sh/release-namespace: istio-poc
+  labels:
+    app: test-app
+    app.kubernetes.io/managed-by: Helm
+    chart: default-beta-0.4.0-beta
+    heritage: Helm
+    provider: GCP
+    region: us-central1
+    release: test-app
+  name: external-test-app-us-central1
+  namespace: istio-poc
+spec:
+  externalName: test-app.istio.app.dev
+  ports:
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 443
+  sessionAffinity: None
+  type: ExternalName
+status:
+  loadBalancer: {}

@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    meta.helm.sh/release-name: test-app
+    meta.helm.sh/release-namespace: istio-poc
+  labels:
+    app: test-app
+    app.kubernetes.io/managed-by: Helm
+    chart: default-beta-0.4.0-beta
+    heritage: Helm
+    provider: GCP
+    region: us-central1
+    release: test-app
+  name: test-app
+  namespace: istio-poc
+spec:
+  clusterIP: 242.171.37.13
+  clusterIPs:
+  - 242.171.37.13
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: http
+  selector:
+    app: test-app
+    release: test-app
+    test-app-role: webserver
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
