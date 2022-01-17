@@ -82,9 +82,9 @@ Or to get a full description of your configurations:
 gcloud container clusters create <cluster_name> \
     --num-nodes=2 \
     --project=<project_name-in_GCP> \
-    --region=us-central1
-    --zone=us-central1-c
-    --machine-type f1-micro
+    --region=us-central1 \
+    --zone=us-central1-c \
+    --machine-type f1-micro \
     --enable-stackdriver-kubernetes
 ```
 

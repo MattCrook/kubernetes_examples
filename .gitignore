@@ -5,3 +5,5 @@ tls.cert*
 tls.key*
 https.cert*
 https.key*
+
+istio-1.12.1

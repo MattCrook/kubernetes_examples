@@ -65,3 +65,44 @@ Using the istioctl proxy-status command allows you to get an overview of your me
 ```
 istioctl proxy-status
 ```
+
+
+Verifying the presence of the Istio sidecar injector
+```
+kubectl get svc -n istio-system
+
+kubectl -n istio-system get deployment -l istio=sidecar-injector
+```
+
+The `NamespaceSelector` decides whether to run the webhook on an object based on whether the namespace for that object matches the selector.
+Label the default namespace with istio-injection=enabled:
+```
+kubectl label namespace default istio-injection=enabled
+
+Then confirm which namespaces have the istio-injection label:
+kubectl get namespace -L istio-injection”
+```
+
+Identifying the IP address and port number of the exposed sample application on Istio ingress gateway
+```
+echo "http://$(kubectl get nodes -o template --template='{{range.items}}
+     {{range.status.addresses}}{{if eq .type "InternalIP"}}{{.address}}{{end}}{{end}}
+     {{end}}'):$(kubectl get svc istio-ingressgateway \
+     -n istio-system -o jsonpath='{.spec.ports[0].nodePort}')/
+     productpage"
+```
+
+
+You can use istioctl as a tool to manually inject the Envoy sidecar definition into Kubernetes manifests. To do so, use istioctl’s kube-inject capability to manually inject the sidecar into deployment manifests by manipulating the YAML file:
+```
+istioctl kube-inject -f samples/sleep/sleep.yaml | kubectl apply -f -
+```
+You can update Kubernetes specifications on the fly at the time of applying them to Kubernetes for scheduling. Alternatively, you might use the istioctl kube-inject utility, like so:
+```
+kubectl apply -f <(istioctl kube-inject -f <resource.yaml>)
+```
+
+If you don’t have the source manifests available, you can update an existing Kubernetes deployment to bring its services onto the mesh:
+```
+kubectl get deployment -o yaml | istioctl kube-inject -f - | kubectl apply -f -
+```
