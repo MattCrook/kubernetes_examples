@@ -106,3 +106,165 @@ If you don’t have the source manifests available, you can update an existing K
 ```
 kubectl get deployment -o yaml | istioctl kube-inject -f - | kubectl apply -f -
 ```
+
+----
+
+## Istioctl
+
+##### Get overview of mesh
+
+https://istio.io/latest/docs/ops/diagnostic-tools/proxy-cmd/
+
+The proxy-status command allows you to get an overview of your mesh. If you suspect one of your sidecars isn’t receiving configuration or is out of sync then proxy-status will tell you this.
+
+- SYNCED means that Envoy has acknowledged the last configuration Istiod has sent to it.
+- NOT SENT means that Istiod hasn’t sent anything to Envoy. This usually is because Istiod has nothing to send.
+- STALE means that Istiod has sent an update to Envoy but has not received an acknowledgement. This usually indicates a networking issue between Envoy and Istiod or a bug with Istio itself.
+
+```
+istioctl proxy-status
+istioctl proxy-status <PROXY_NAME>
+```
+
+
+##### See how a given Envoy instance is configured
+
+https://istio.io/latest/docs/ops/diagnostic-tools/proxy-cmd/#deep-dive-into-envoy-configuration
+
+The proxy-config command can be used to see how a given Envoy instance is configured. This can then be used to pinpoint any issues you are unable to detect by just looking through your Istio configuration and custom resources. To get a basic summary of clusters, listeners or routes for a given pod use the command as follows (changing clusters for listeners or routes when required):
+
+
+
+```
+istioctl proxy-config <clusters|listeners|routes|endpoints|bootstrap|log|secret> <pod-name> -n <namsespoce>
+
+
+Examples:
+- istioctl proxy-config cluster -n istio-system istio-ingressgateway-7d6874b48f-qxhn5
+- istioctl proxy-config listeners <pod | proxy> -n <NAMESPACE>
+- istioctl proxy-config routes <pod | proxy> -n <NAMESPACE>
+- istioctl proxy-config listeners shipt-test-app-webserver-65cf6c695f-hj8w4 -n istio-poc
+- istioctl proxy-config listeners shipt-test-app-webserver-65cf6c695f-hj8w4 -n istio-poc -o json
+
+```
+
+
+##### Proxy config diff/ JSON output
+
+```
+istioctl proxy-config <clusters|listeners|routes|endpoints|bootstrap|log|secret> <POD> --port <PORT> -n <NAMESPACE> -o json
+
+
+Examples:
+- istioctl proxy-config listeners istio-ingressgateway-747c547894-mldlq --port 8443 -o json -n istio-system
+- istioctl proxy-config listeners productpage-v1-6c886ff494-7vxhs --port 15001 -o json -n default
+```
+
+##### Routes and Endpoints
+
+```
+Find the route from the listener routeConfigName or virtualHoost that Envoy tells Envoy to send the request:
+- istioctl proxy-config routes <pod> --name 9080 -o json
+
+
+To see the endpoints currently available for this cluster use the proxy-config endpoints command:
+- istioctl proxy-config cluster productpage-v1-6c886ff494-7vxhs --fqdn reviews.default.svc.cluster.local -o json
+
+
+- istioctl proxy-config endpoints productpage-v1-6c886ff494-7vxhs --cluster "outbound|9080||reviews.default.svc.cluster.local"
+
+```
+
+##### Detect potential issues with your Istio configuration
+
+https://istio.io/latest/docs/ops/diagnostic-tools/istioctl-analyze/
+
+```
+istioctl analyze
+```
+
+-----
+
+### Example
+
+```
+istioctl proxy-status
+istioctl proxy-status istioctl proxy-status istio-ingressgateway-747c547894-mldlq.istio-system
+istioctl proxy-config cluster istio-ingressgateway-747c547894-mldlq.istio-system -n istio-system
+istioctl proxy-config cluster istio-ingressgateway-747c547894-mldlq.istio-system -n istio-system -o json
+
+kubectl get pods -n istio-poc
+
+istioctl proxy-config listeners shipt-test-app-webserver-65cf6c695f-hj8w4 -n istio-poc
+istioctl proxy-config listeners shipt-test-app-webserver-65cf6c695f-hj8w4 -n istio-poc -o json
+istioctl proxy-config listeners shipt-test-app-webserver-65cf6c695f-hj8w4 -n istio-poc --port 15001
+istioctl proxy-config listeners shipt-test-app-webserver-65cf6c695f-hj8w4 -n istio-poc --port 15001 -o json
+```
+
+```
+istioctl proxy-config listeners shipt-test-app-webserver-65cf6c695f-hj8w4 -n istio-poc -o json
+```
+
+- From the above summary you can see that every sidecar has a listener bound to 0.0.0.0:15006 which is where IP tables routes all inbound pod traffic to and a listener bound to 0.0.0.0:15001 which is where IP tables routes all outbound pod traffic to. The 0.0.0.0:15001 listener hands the request over to the virtual listener that best matches the original destination of the request, if it can find a matching one. Otherwise, it sends the request to the PassthroughCluster which connects to the destination directly.
+
+
+```
+istioctl proxy-config listeners shipt-test-platform-webserver-7fb65bf747-b6xqn -n istio-poc -o json
+istioctl proxy-config listeners shipt-test-platform-webserver-7fb65bf747-b6xqn -n istio-poc -o json --port 9080
+```
+- Our request is an outbound HTTP request to port 9080 this means it gets handed off to the 0.0.0.0:9080 virtual listener. This listener then looks up the route configuration in its configured RDS. In this case it will be looking up route 9080 in RDS configured by Istiod (via ADS).
+
+- The 9080 route configuration only has a virtual host for each service. Our request is heading to the reviews service so Envoy will select the virtual host to which our request matches a domain. Once matched on domain Envoy looks for the first route that matches the request. In this case we don’t have any advanced routing so there is only one route that matches on everything. This route tells Envoy to send the request to the `outbound|9080||reviews.default.svc.cluster.local cluster`.
+
+```
+outbound|9080||details.bookinfo.svc.cluster.local
+outbound|9080||productpage.bookinfo.svc.cluster.local
+outbound|9080||ratings.bookinfo.svc.cluster.local
+outbound|9080||reviews.bookinfo.svc.cluster.local
+```
+
+```
+istioctl proxy-config routes shipt-test-platform-webserver-7fb65bf747-b6xqn -n istio-poc --name 9080 -o json
+```
+
+
+- This cluster is configured to retrieve the associated endpoints from Istiod (via ADS). So Envoy will then use the serviceName field as a key to look up the list of Endpoints and proxy the request to one of them.
+
+```
+istioctl proxy-config cluster shipt-test-platform-webserver-7fb65bf747-b6xqn --fqdn reviews.default.svc.cluster.local -o json
+```
+
+##### To see the endpoints currently available for this cluster use the proxy-config endpoints command.
+```
+- istioctl proxy-config endpoints shipt-test-platform-webserver-7fb65bf747-b6xqn --cluster "outbound|9080||details.bookinfo.svc.cluster.local" -n istio-poc
+- istioctl proxy-config endpoints shipt-test-platform-webserver-7fb65bf747-b6xqn --cluster "outbound|9080||reviews.default.svc.cluster.local" -n istio-poc
+- istioctl proxy-config endpoints shipt-test-platform-webserver-7fb65bf747-b6xqn --cluster "outbound|9080||productpage.bookinfo.svc.cluster.local" -n istio-poc
+- istioctl proxy-config endpoints shipt-test-platform-webserver-7fb65bf747-b6xqn --cluster "outbound|9080||ratings.default.svc.cluster.local" -n istio-poc
+```
+
+
+
+## Verify Istiod
+
+https://istio.io/latest/docs/ops/diagnostic-tools/proxy-cmd/#verifying-connectivity-to-istiod
+
+##### Create sleep Pod
+```
+kubectl create namespace foo
+kubectl apply -f <(istioctl kube-inject -f samples/sleep/sleep.yaml) -n foo
+
+
+
+Test connectivity to Istiod using curl. The following example invokes the v1 registration API using default Istiod configuration parameters and mutual TLS enabled:
+
+kubectl exec $(kubectl get pod -l app=sleep -n foo -o jsonpath={.items..metadata.name}) -c sleep -n foo -- curl -sS istiod.istio-system:15014/version
+
+```
+
+
+### Find out Envoy Version Istio is Using:
+
+To find out the Envoy version used in deployment, you can exec into the container and query the server_info endpoint:
+```
+kubectl exec -it productpage-v1-6b746f74dc-9stvs -c istio-proxy -n default  -- pilot-agent request GET server_info --log_as_json | jq {version}
+```

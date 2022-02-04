@@ -59,6 +59,8 @@ Delete cluster when done:
 * `eksctl delete cluster --name <cluster_name> --region us-east-2`
 
 
+-----
+
 ## Set up a quick Kubernetes Cluster on GCP
 
 Same as with AWS, if you want to quickly provision a Kubernetes cluster to play around with, and don't want/ need to deal with the configuration in Terraform, you can use the `gcloud` command line tool to do so.
@@ -132,3 +134,10 @@ Enabling the Ingress add-on in Minikube. You can check whether it is by listing 
 
 *Example - adding ingress*:
 * `minikube addons enable ingress`
+
+
+-----
+
+## Istio
+
+##### See Istio [README](Istio)
