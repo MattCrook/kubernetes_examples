@@ -1,0 +1,30 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: {{ include "istio-demo.fullname" . }}
+  labels:
+    # app: flaskapp
+    {{- include "istio-demo.labels" . | nindent 4 }}
+spec:
+  selector:
+    {{- include "istio-demo.selectorLabels" . | nindent 4 }}
+    # istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+  #   tls:
+  #     httpsRedirect: false
+  # - port:
+  #     number: 5000
+  #     name: flask
+  #     protocol: HTTP
+  #   hosts:
+  #   - "*"
+    # tls:
+    #   mode: SIMPLE #enables HTTPS on this port
+    #   serverCertificate: /etc/certs/servercert.pem
+    #   privateKey: /etc/certs/privatekey.pem

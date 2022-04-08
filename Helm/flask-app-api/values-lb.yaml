@@ -1,0 +1,153 @@
+replicaCount: 2
+
+nginx:
+  image:
+    name: nginx
+    repository: nginx
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+
+flaskapp:
+  name: flask-app-api
+  labels:
+    app: flask-app
+  image:
+    repository: mgcrook11/flask-app-api:1.6
+    name: flask-app-api
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+  pod:
+    name: flask-app-api-pod
+  resources:
+    limits:
+      cpu: 128m
+      memory: 500Mi
+    requests:
+      cpu: 128m
+      memory: 500Mi
+
+# imagePullSecrets:
+#   - name: flaskappdockerhubsecret
+
+# default dockerhub secret created from template file
+imagePullSecrets:
+- name: dockerregistrykey
+
+
+# Creating image pull secret
+# Defined In helper template to compose the Docker configuration file for use as the Secret's payload
+imageCredentials:
+  registry: https://index.docker.io/v2/
+  username: ''
+  password: ''
+  email:
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+# service:
+#   clusterip:
+#     type: ClusterIP
+#     port: 80
+#     targetPort: 80
+#   loadbalancer:
+#     type: LoadBalancer
+#     port: 80
+#     targetPort: 5000
+#   nodeport:
+#     type: NodePort
+#     port: 80
+#     targetPort: 5000
+
+service:
+  type: "ClusterIP"
+  port: 80
+  targetPort: 5000
+
+loadbalancer:
+  enabled: true
+
+# Must be true if using Ingress in GCP.
+nodeport:
+  enabled: false
+
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+
+https:
+  config:
+    enabled: true
+  secret:
+    enabled: false
+  tls:
+    secret:
+      enabled: false
+
+resources:
+  flaskapp:
+    limits:
+      cpu: 128m
+      memory: 500Mi
+    requests:
+      cpu: 128m
+      memory: 500Mi
+  nginx:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+fluent:
+  enabled: true
+
+prometheus:
+  enabled: true

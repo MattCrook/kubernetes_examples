@@ -1,0 +1,11 @@
+{{- if .Values.https.config.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "flask-app-api.fullname" . }}-https-cm
+data:
+  https.key: |
+    # base64 encoded key
+  https.crt: |
+    # base64 encoded cert
+{{- end }}

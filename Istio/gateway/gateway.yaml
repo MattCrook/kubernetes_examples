@@ -1,0 +1,27 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  annotations:
+    app.shipt.com/cluster: app-staging
+    app.shipt.com/environment: staging
+    app.shipt.com/group: app
+    app.shipt.com/region: us-central1
+  generation: 1
+  labels:
+    app: shipt-test-app
+    release: shipt-test-app
+  name: shipt-test-app-shipt-test-app-1
+  namespace: app
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - shipt-test-app-1.us-central1.staging.shipt.com
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: prod-wildcard-us-central1-staging-shipt-com-tls
+      mode: SIMPLE

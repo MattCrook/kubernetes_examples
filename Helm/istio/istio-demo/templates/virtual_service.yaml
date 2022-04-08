@@ -1,0 +1,21 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ include "istio-demo.fullname" . }}
+  labels:
+    # app: flaskapp
+    {{- include "istio-demo.labels" . | nindent 4 }}
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - {{ include "istio-demo.fullname" . }}-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: {{ include "istio-demo.fullname" . }}
+        port:
+          number: 5000

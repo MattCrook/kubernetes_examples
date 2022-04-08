@@ -1,0 +1,27 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  annotations:
+    app.shipt.com/cluster: app-staging
+    app.shipt.com/environment: staging
+    app.shipt.com/group: app
+    app.shipt.com/region: us-central1
+  labels:
+    app: shipt-test-app
+    release: shipt-test-app
+  name: shipt-test-app-shipt-test-app-1-ingress
+  namespace: app
+spec:
+  gateways:
+  - shipt-test-app-shipt-test-app-1
+  hosts:
+  - shipt-test-app-1.us-central1.staging.shipt.com
+  http:
+  - name: shipt-test-app-1
+    retries:
+      attempts: 5
+      perTryTimeout: 15s
+    route:
+    - destination:
+        host: shipt-test-app-api.app.svc.cluster.local
+    timeout: 5s

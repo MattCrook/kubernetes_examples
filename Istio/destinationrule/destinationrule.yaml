@@ -1,0 +1,44 @@
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  annotations:
+    app.shipt.com/cluster: app-staging
+    app.shipt.com/environment: staging
+    app.shipt.com/group: app
+    app.shipt.com/region: us-central1
+  labels:
+    app: shipt-test-app
+    release: shipt-test-app
+  name: shipt-test-app-api
+  namespace: app
+spec:
+  host: shipt-test-app-api.app.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      http:
+        idleTimeout: 60s
+        maxRetries: 50
+      tcp:
+        connectTimeout: 5s
+        maxConnections: 100000
+        tcpKeepalive:
+          interval: 5s
+          probes: 3
+          time: 30s
+    loadBalancer:
+      localityLbSetting:
+        distribute:
+        - from: us-east4/*
+          to:
+            us-central1/*: 50
+            us-east4/*: 50
+        - from: us-central1/*
+          to:
+            us-central1/*: 50
+            us-east4/*: 50
+        enabled: true
+    outlierDetection:
+      baseEjectionTime: 10m
+      consecutive5xxErrors: 1
+      interval: 4s
+      maxEjectionPercent: 10

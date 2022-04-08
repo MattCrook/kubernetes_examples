@@ -1,0 +1,12 @@
+{{- if .Values.prometheus.enabled -}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+    name: {{ template "flask-app-api.fullname" . }}-flaskapp-cm
+data:
+    monitoring: |
+        prometheus_config {
+            enable: true,
+            path: "/monitoring/prometheus/metrics"
+        }
+{{- end }}
