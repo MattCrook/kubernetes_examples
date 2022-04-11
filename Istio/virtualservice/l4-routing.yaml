@@ -1,0 +1,27 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  Name: dev-api-server
+spec:
+  hosts:
+  - api.company.com
+  tcp:
+  - match:
+    - port: 9090
+      destinationSubnets:
+      - 10.128.0.0/16
+    route:
+    - destination:
+        host: database.test.svc.cluster.local
+  - match:
+    - port: 9090
+    route:
+    - destination:
+        host: database.prod.svc.cluster.local
+  tls:
+  - match:
+    - sniHosts:
+      - example.api.company.com
+    route:
+    - destination:
+        host: example.prod.svc.cluster.local
