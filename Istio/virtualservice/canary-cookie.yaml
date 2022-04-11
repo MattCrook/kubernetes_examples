@@ -1,3 +1,8 @@
+# Another common pattern is to canary a new deployment to a set of trusted test users like
+# the service team itself or a set of customers who have opted into experimental features.
+# You can use Istio to set a “trusted-tester” cookie, for example, which at routing time can divert requests
+# in that specific session to different workloads as opposed to workloads serviced by requests without this cookie.
+
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:

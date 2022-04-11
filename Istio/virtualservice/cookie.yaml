@@ -1,0 +1,19 @@
+# Redirecting requests based on the presence of a value in a cookie
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  Name: dev-webserver
+spec:
+  hosts:
+  - webserver.company.com
+  http:
+  - match:
+    - headers:
+       cookie:
+          environment: "dev"
+    route:
+    - destination:
+        host: webserver.dev.svc.cluster.local
+  - route:
+    - destination:
+        host: webserver.prod.svc.cluster.local

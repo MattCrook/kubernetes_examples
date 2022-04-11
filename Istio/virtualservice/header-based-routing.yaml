@@ -1,0 +1,26 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  Name: foo-bars-svc
+spec:
+  hosts:
+  - bar.foo.svc.cluster.local
+  http:
+  - match:
+    - uri:
+        exact: "/assets/static/style.css"
+    route:
+    - destination:
+        host: webserver.frontend.svc.cluster.local
+  - match:
+    - uri:
+        # Match requests like "/foo/132:myCustomMethod"
+        regex: "/foo/\\d+:myCustomMethod"
+    route:
+    - destination:
+        host: bar.foo.svc.cluster.local
+        subset: v3
+  - route:
+    - destination:
+        host: bar.foo.svc.cluster.local
+        subset: v2
